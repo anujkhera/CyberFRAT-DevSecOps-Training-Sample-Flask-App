@@ -18,7 +18,7 @@ pipeline {
       steps {
         script{
           docker.withRegistry('', registryCredential ) {
-          docker.Image.push()
+          dockerImage.push()
         }
       }
      }
@@ -26,7 +26,7 @@ pipeline {
         
     stage('Test Run') {
       steps {
-        sh 'docker run -d cyberfrat:$BUILD_NUMBER'
+        sh 'docker run -d $registry:$BUILD_NUMBER'
       }
     }
    }
