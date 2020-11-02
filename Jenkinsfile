@@ -9,18 +9,19 @@ pipeline {
          
   stages {
     
-    stage('Chck for Secrets'){
+    stage('Check for Secrets'){
       steps {
           sh "rm -rf trufflehog.json || true"
           sh "docker rundxa4481/trufflehog:latest --json https://github.com/anujkhera/CyberFRAT-DevSecOps-Training-Sample-Flask-App.git > trufflehog.json || true"
           sh "cat trufflehog.json"
         }
        }
-    stage('SCA') {
+    
+    stage('SCA'){
       steps {
         sh "pip3 install safety"
         sh "rm -rf safety.json || true"
-        sh "safety check -r requirements.txt --json > safety.json"
+        sh "safety check -r requirements.txt --json > safety.json || true"
         sh"cat safety.json
       }
     }
