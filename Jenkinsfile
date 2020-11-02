@@ -8,6 +8,15 @@ pipeline {
   
          
   stages {
+    
+    stage('Chck for Secrets'){
+      steps {
+          sh "rm -rf trufflehog.json || true"
+          sh "docker rundxa4481/trufflehog:latest --json https://github.com/anujkhera/CyberFRAT-DevSecOps-Training-Sample-Flask-App.git > trufflehog.json || true"
+          sh "cat trufflehog.json"
+        }
+       }
+    
     stage('Build Docker Image') {
       steps {
         script {
