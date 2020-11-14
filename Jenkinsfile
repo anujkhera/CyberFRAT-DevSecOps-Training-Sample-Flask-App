@@ -91,5 +91,44 @@ pipeline {
         }
       }
     } 
+    
+    stage("Compliance as Code"){
+      steps{
+        sh '''
+        curl https://omnitruck.chef.io/install.sh | sudo bash -s -- -P inspec || true
+        inspec exec https://github.com/dev-sec/cis-docker-benchmark || true
+        inspec exec https://github.com/dev-sec/linux-baseline || true
+        '''
+      }
+    }
+    
+    stage("Deploy to PROD"){
+      steps{
+        script{
+          input message: 'Do you want to deploy in production?', ok: "OK"
+        }
+      }
+    }
+   
+    stage('Deploy to Application Server') {
+      steps {
+        sshagent(['AppSec']) {
+          sh 'ssh -o StrictHostKeyChecking=no root@159.89.112.169 "uptime && docker pull anujkhera/cyberfrat:$BUILD_NUMBER && docker stop devsecops-training && docker rm devsecops-training && docker run -d -p 5000:5000 --name devsecops-training anujkhera/cyberfrat:$BUILD_NUMBER"'
+          sh 'ssh -o StrictHostKeyChecking=no root@159.89.112.169 "inspec exec https://github.com/dev-sec/linux-baseline || true"'
+        }
+      }
+    }
+    
+    stage("Push Data to DefectDojo"){
+      steps{
+        sh '''
+        DATE= date +%Y-%m-%d
+        curl -i -F 'file=@trufflehog.json' -H 'Authorization: ApiKey admin:33581a4447cc52d72eb6bd926ce1fd239d408c52' -F 'scan_type=Trufflehog Scan' -F 'tags=apicurl' -F 'verified=true' -F 'active=true' -F 'scan_date=2020-11-14' -F 'engagement=/api/v1/engagements/1/' http://159.89.112.169:8080/api/v1/importscan/
+        '''
+      }
+    }
+    
+    
+    
   } 
 }
