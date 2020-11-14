@@ -54,8 +54,8 @@ pipeline {
     stage('Deploy Test Application') {
       steps {
         sh 'docker stop flaskr && docker rm flaskr || true'
-        sh 'docker pull anujkhera/cyberfrat:$BUILD_NUMBER'
-        sh 'docker run -d -p 5000:5000 --name flaskr anujkhera/cyberfrat:$BUILD_NUMBER'
+        sh 'docker pull anujkhera/cyberfrat:latest'
+        sh 'docker run -d -p 5000:5000 --name flaskr anujkhera/cyberfrat:latest'
       }
     }
 
@@ -85,7 +85,7 @@ pipeline {
             # sleep 1
             DOCKER_GATEWAY=$(docker network inspect bridge --format "{{range .IPAM.Config}}{{.Gateway}}{{end}}")
             wget -qO clair-scanner https://github.com/arminc/clair-scanner/releases/download/v8/clair-scanner_linux_amd64 && chmod +x clair-scanner
-            ./clair-scanner --ip="$DOCKER_GATEWAY" anujkhera/cyberfrat:$BUILD_NUMBER || exit 0
+            ./clair-scanner --ip="$DOCKER_GATEWAY" anujkhera/cyberfrat:latest || exit 0
             '''
           }
         }
@@ -113,7 +113,7 @@ pipeline {
     stage('Deploy to Application Server') {
       steps {
         sshagent(['AppSec']) {
-          sh 'ssh -o StrictHostKeyChecking=no root@159.89.112.169 "uptime && docker pull anujkhera/cyberfrat:$BUILD_NUMBER && docker stop devsecops-training && docker rm devsecops-training && docker run -d -p 5000:5000 --name devsecops-training anujkhera/cyberfrat:$BUILD_NUMBER"'
+          sh 'ssh -o StrictHostKeyChecking=no root@159.89.112.169 "uptime && docker pull anujkhera/cyberfrat:latest && docker stop devsecops-training && docker rm devsecops-training && docker run -d -p 5000:5000 --name devsecops-training anujkhera/cyberfrat:latest"'
           sh 'ssh -o StrictHostKeyChecking=no root@159.89.112.169 "inspec exec https://github.com/dev-sec/linux-baseline || true"'
         }
       }
