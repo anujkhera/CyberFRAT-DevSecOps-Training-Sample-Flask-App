@@ -113,7 +113,7 @@ pipeline {
     stage('Deploy to Application Server') {
       steps {
         sshagent(['AppSec']) {
-          sh 'ssh -o StrictHostKeyChecking=no root@159.89.112.169 "uptime && docker pull anujkhera/cyberfrat:latest && docker stop devsecops-training && docker rm devsecops-training && docker run -d -p 5000:5000 --name devsecops-training anujkhera/cyberfrat:latest"'
+          sh 'ssh -o StrictHostKeyChecking=no root@159.89.112.169 "uptime && docker pull anujkhera/cyberfrat:latest && docker run -d -p 5000:5000 --name devsecops-training anujkhera/cyberfrat:latest"'
           sh 'ssh -o StrictHostKeyChecking=no root@159.89.112.169 "inspec exec https://github.com/dev-sec/linux-baseline || true"'
         }
       }
